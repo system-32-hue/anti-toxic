@@ -1,28 +1,62 @@
 local Players = game:GetService("Players")
 
-local notificationsEnabled = true
+local MAX_WALKSPEED = 32
+local MAX_JUMPPOWER = 100
+local MAX_TELEPORT_DISTANCE = 120
+local MAX_FLAGS = 5
 
-local function Notify(message)
-	if notificationsEnabled then
-		warn("[Systems ANTI-CHEAT] " .. message)
+local Flags = {}
+
+local function AddFlag(player, reason)
+	Flags[player] = (Flags[player] or 0) + 1
+
+	warn("[ANTI-CHEAT]", player.Name, reason, "Flags:", Flags[player])
+
+	if Flags[player] >= MAX_FLAGS then
+		player:Kick("Anti-Cheat: Multiple violations detected.")
 	end
 end
 
-local function CheckExploit(name)
-	local obj = game:FindFirstChild(name, true)
+local function MonitorCharacter(player, character)
+	local humanoid = character:WaitForChild("Humanoid")
+	local root = character:WaitForChild("HumanoidRootPart")
 
-	if obj then
-		obj:Destroy()
+	local lastPosition = root.Position
 
-		Notify("Exploit detected: " .. name)
+	while player.Parent and character.Parent do
+		task.wait(1)
 
-		for _, plr in ipairs(Players:GetPlayers()) do
-			plr:Kick("Exploit detected: " .. name)
+		if humanoid.WalkSpeed > MAX_WALKSPEED then
+			AddFlag(player, "WalkSpeed")
+			humanoid.WalkSpeed = 16
 		end
+
+		if humanoid.JumpPower > MAX_JUMPPOWER then
+			AddFlag(player, "JumpPower")
+			humanoid.JumpPower = 50
+		end
+
+		local distance = (root.Position - lastPosition).Magnitude
+
+		if distance > MAX_TELEPORT_DISTANCE then
+			AddFlag(player, "Teleport")
+			root.CFrame = CFrame.new(lastPosition)
+		end
+
+		lastPosition = root.Position
 	end
 end
 
-while task.wait(1) do
-	CheckExploit("Dex")
-	CheckExploit("IY_GUI")
-end
+Players.PlayerAdded:Connect(function(player)
+	Flags[player] = 0
+
+	player.CharacterAdded:Connect(function(character)
+		task.spawn(function()
+			MonitorCharacter(player, character)
+		end)
+	end)
+end)
+
+Players.PlayerRemoving:Connect(function(player)
+	Flags[player] = nil
+end)
