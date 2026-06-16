@@ -1,3 +1,4 @@
+print("ANTI-CHEAT STARTED")
 local Players = game:GetService("Players")
 
 local MAX_WALKSPEED = 32
