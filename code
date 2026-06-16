@@ -1,8 +1,34 @@
-print('made by system on github')
-local plr = game.Players.LocalPlayer
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
 
-while wait() do
-	local Player = game.Players.LocalPlayer
-	while game.Players:FindFirstChild("Dex", true ) ~= nil do game:FindFirstChild("Dex", true ):Remove() plr:Kick("Someone tried to run dex but failed lol!!!!!") end
-	while game.Players:FindFirstChild("IY_GUI", true ) ~= nil do game:FindFirstChild("IY_GUI", true ):Remove() plr:Kick("Someone tried to run infinite yield but failed lol!!!!!") end
+local notificationsEnabled = true
+
+local function Notify(message)
+	if notificationsEnabled then
+		warn("[Systems ANTI-CHEAT] " .. message)
+	end
+end
+
+local function CheckExploit(name, kickReason)
+	local obj = game:FindFirstChild(name, true)
+
+	if obj then
+		obj:Destroy()
+
+		Notify("Exploit detected: " .. name)
+
+		player:Kick(kickReason)
+	end
+end
+
+while task.wait(1) do
+	CheckExploit(
+		"Dex",
+		"Someone tried to run Dex."
+	)
+
+	CheckExploit(
+		"IY_GUI",
+		"Someone tried to run Infinite Yield."
+	)
 end
