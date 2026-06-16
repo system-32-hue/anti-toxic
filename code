@@ -1,6 +1,14 @@
 local Players = game:GetService("Players")
 
 print("ANTI-CHEAT STARTED")
+print('made by system')
+local sfx = Instance.new("Sound")
+
+sfx.Name = "AntiCheatStartupSound"
+sfx.SoundId = "rbxassetid://117409737658405"
+sfx.Parent = workspace
+
+sfx:Play()
 
 local function Notify(msg)
 	warn("[Systems ANTI-CHEAT] " .. msg)
