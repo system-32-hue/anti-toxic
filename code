@@ -1,5 +1,4 @@
 local Players = game:GetService("Players")
-local player = Players.LocalPlayer
 
 local notificationsEnabled = true
 
@@ -9,7 +8,7 @@ local function Notify(message)
 	end
 end
 
-local function CheckExploit(name, kickReason)
+local function CheckExploit(name)
 	local obj = game:FindFirstChild(name, true)
 
 	if obj then
@@ -17,18 +16,13 @@ local function CheckExploit(name, kickReason)
 
 		Notify("Exploit detected: " .. name)
 
-		player:Kick(kickReason)
+		for _, plr in ipairs(Players:GetPlayers()) do
+			plr:Kick("Exploit detected: " .. name)
+		end
 	end
 end
 
 while task.wait(1) do
-	CheckExploit(
-		"Dex",
-		"Someone tried to run Dex."
-	)
-
-	CheckExploit(
-		"IY_GUI",
-		"Someone tried to run Infinite Yield."
-	)
+	CheckExploit("Dex")
+	CheckExploit("IY_GUI")
 end
