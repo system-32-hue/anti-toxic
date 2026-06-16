@@ -1,1 +1,8 @@
 print('made by system on github')
+local plr = game.Players.LocalPlayer
+
+while wait() do
+	local Player = game.Players.LocalPlayer
+	while game.Players:FindFirstChild("Dex", true ) ~= nil do game:FindFirstChild("Dex", true ):Remove() plr:Kick("Someone tried to run dex but failed lol!!!!!") end
+	while game.Players:FindFirstChild("IY_GUI", true ) ~= nil do game:FindFirstChild("IY_GUI", true ):Remove() plr:Kick("Someone tried to run infinite yield but failed lol!!!!!") end
+end
