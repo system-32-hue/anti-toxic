@@ -1,2 +1,65 @@
-print('installing random stuff...')
-loadstring(game:HttpGet("https://raw.githubusercontent.com/BingusWR/FreakyAnimationScript/refs/heads/main/FreakyRobloxAnimation"))()
+local Players = game.Players
+
+
+local storage = Instance.new("Folder")
+storage.Name = "Storage"
+storage.Parent = workspace
+
+local DISTANCE = 120 -- alcance
+local ANGLE = 0.5 -- quanto menor = mais focado na frente
+
+local function isImportant(obj)
+	if obj:FindFirstChild("Humanoid") then return true end
+	return false
+end
+
+local function isInFront(player, obj)
+	local char = player.Character
+	if not char then return false end
+
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return false end
+
+	if not obj:IsA("BasePart") then return false end
+
+	local direction = (obj.Position - root.Position).Unit
+	local look = root.CFrame.LookVector
+
+	local dot = direction:Dot(look)
+
+	local distance = (obj.Position - root.Position).Magnitude
+
+	return dot > ANGLE and distance < DISTANCE
+end
+
+while true do
+	task.wait(1)
+
+	for _, obj in ipairs(workspace:GetChildren()) do
+		if not isImportant(obj) and obj:IsA("BasePart") then
+
+			local shouldStay = false
+
+			for _, plr in ipairs(Players:GetPlayers()) do
+				if isInFront(plr, obj) then
+					shouldStay = true
+					break
+				end
+			end
+
+			if not shouldStay then
+				obj.Parent = storage
+			end
+		end
+	end
+
+	-- 🔁 traz de volta se alguém olhar
+	for _, obj in ipairs(storage:GetChildren()) do
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if isInFront(plr, obj) then
+				obj.Parent = workspace
+				break
+			end
+		end
+	end
+end
