@@ -1,0 +1,108 @@
+local Players = game.Players
+
+
+local storage = Instance.new("Folder")
+storage.Name = "Storage"
+storage.Parent = workspace
+
+local DISTANCE = 120
+local ANGLE = 0.5
+
+local function isImportant(obj)
+	if obj:FindFirstChild("Humanoid") then return true end
+	return false
+end
+
+local function isInFront(player, obj)
+	local char = player.Character
+	if not char then return false end
+
+	local root = char:FindFirstChild("HumanoidRootPart")
+	if not root then return false end
+
+	if not obj:IsA("BasePart") then return false end
+
+	local direction = (obj.Position - root.Position).Unit
+	local look = root.CFrame.LookVector
+
+	local dot = direction:Dot(look)
+
+	local distance = (obj.Position - root.Position).Magnitude
+
+	return dot > ANGLE and distance < DISTANCE
+end
+
+while true do
+	task.wait(1)
+
+	for _, obj in ipairs(workspace:GetChildren()) do
+		if not isImportant(obj) and obj:IsA("BasePart") then
+
+			local shouldStay = false
+
+			for _, plr in ipairs(Players:GetPlayers()) do
+				if isInFront(plr, obj) then
+					shouldStay = true
+					break
+				end
+			end
+
+			if not shouldStay then
+				obj.Parent = storage
+			end
+		end
+	end
+
+	
+	for _, obj in ipairs(storage:GetChildren()) do
+		for _, plr in ipairs(Players:GetPlayers()) do
+			if isInFront(plr, obj) then
+				obj.Parent = workspace
+				break
+			end
+		end
+	end
+end
+
+local RunService = game:GetService("RunService")
+
+local Engine = {}
+
+Engine.queue = {}
+Engine.maxPerFrame = 25
+
+
+Engine.frozen = false
+
+function Engine:add(fn)
+	table.insert(self.queue, fn)
+end
+
+
+function Engine:Freeze()
+	self.frozen = true
+end
+
+function Engine:Unfreeze()
+	self.frozen = false
+end
+
+RunService.Heartbeat:Connect(function()
+	if Engine.frozen then return end
+
+	local processed = 0
+
+	while processed < Engine.maxPerFrame do
+		local taskFn = table.remove(Engine.queue, 1)
+		if not taskFn then break end
+
+		local ok, err = pcall(taskFn)
+		if not ok then
+			warn("[ENGINE ERROR]:", err)
+		end
+
+		processed += 1
+	end
+end)
+
+return Engine
