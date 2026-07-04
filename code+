@@ -5,8 +5,8 @@ local storage = Instance.new("Folder")
 storage.Name = "Storage"
 storage.Parent = workspace
 
-local DISTANCE = 120 -- alcance
-local ANGLE = 0.5 -- quanto menor = mais focado na frente
+local DISTANCE = 120 
+local ANGLE = 0.5
 
 local function isImportant(obj)
 	if obj:FindFirstChild("Humanoid") then return true end
@@ -53,7 +53,7 @@ while true do
 		end
 	end
 
-	-- 🔁 traz de volta se alguém olhar
+	
 	for _, obj in ipairs(storage:GetChildren()) do
 		for _, plr in ipairs(Players:GetPlayers()) do
 			if isInFront(plr, obj) then
