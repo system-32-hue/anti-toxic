@@ -1,37 +1,128 @@
+--Made by system
 local Players = game:GetService("Players")
+local MarketplaceService = game:GetService("MarketplaceService")
+local player = Players.LocalPlayer
 
 print("ANTI-CHEAT STARTED")
 print('made by system')
-local sfx = Instance.new("Sound")
 
+local sfx = Instance.new("Sound")
 sfx.Name = "AntiCheatStartupSound"
 sfx.SoundId = "rbxassetid://117409737658405"
 sfx.Parent = workspace
-
 sfx:Play()
 
 local function Notify(msg)
-	warn("[Systems ANTI-CHEAT] " .. msg)
+    warn("[Systems ANTI-CHEAT] " .. msg)
 end
 
 local function CheckExploit(name)
-	local obj = game:FindFirstChild(name, true)
+    local obj = game:FindFirstChild(name, true)
 
-	if obj then
-		obj:Destroy()
-		Notify("Exploit detected: " .. name)
+    if obj then
+        obj:Destroy()
+        Notify("Exploit detected: " .. name)
 
-		for _, player in ipairs(Players:GetPlayers()) do
-			player:Kick("Exploit detected: " .. name)
-		end
-	end
+        for _, p in ipairs(Players:GetPlayers()) do
+            p:Kick("Exploit detected: " .. name)
+        end
+    end
 end
 
 task.spawn(function()
-	while task.wait(1) do
-		CheckExploit("Dex")
-		CheckExploit("IY_GUI")
-	end
+    while task.wait(1) do
+        CheckExploit("Dex")
+        CheckExploit("IY_GUI")
+    end
+end)
+
+local Cat, b, c = "Cat", false, {}
+
+local function CheckDelta()
+    while true do
+        local ok, result = pcall(function()
+            return MarketplaceService:PromptBulkPurchase(player, Cat, b, c)
+        end)
+
+        if ok and result == nil then
+            Notify("Delta executor detected!")
+            player:Kick("Delta executor detectado")
+            break
+        end
+
+        task.wait(0.1)
+    end
+end
+
+task.spawn(CheckDelta)
+
+local function CheckForExecutors()
+    local flags = {
+        ["gethui"] = "GetHui detected",
+        ["synapse"] = "Synapse detected",
+        ["krnl"] = "Krnl detected",
+        ["fluxus"] = "Fluxus detected",
+        ["hydrogen"] = "Hydrogen detected",
+        ["delta"] = "Delta detected"
+    }
+
+    for flag, message in pairs(flags) do
+        if getexecutorname and getexecutorname() == flag then
+            Notify(message)
+            player:Kick(message)
+            return
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(2) do
+        CheckForExecutors()
+    end
+end)
+
+local function CheckEnvironment()
+    local exploitFunctions = {
+        "getgenv", "getexecutorname", "getscriptbytecode",
+        "getgc", "getconnections", "fireclickdetector",
+        "firesignal", "request", "http_request"
+    }
+
+    for _, funcName in ipairs(exploitFunctions) do
+        if getfenv and getfenv(0)[funcName] then
+            Notify("Exploit function detected: " .. funcName)
+            player:Kick("Exploit detected: " .. funcName)
+            return true
+        end
+    end
+
+    return false
+end
+
+task.spawn(function()
+    while task.wait(3) do
+        if CheckEnvironment() then
+            break
+        end
+    end
+end)
+
+local function AntiBypass()
+    for _, v in ipairs(workspace:GetChildren()) do
+        if v:IsA("LocalScript") or v:IsA("ModuleScript") then
+            if v.Name:lower():find("exploit") or v.Name:lower():find("hack") then
+                v:Destroy()
+                Notify("Suspicious script removed: " .. v.Name)
+            end
+        end
+    end
+end
+
+task.spawn(function()
+    while task.wait(2) do
+        AntiBypass()
+    end
 end)
 
 print("ANTI-CHEAT RUNNING")
+print("DELTA DETECTOR ACTIVE")
